@@ -15,6 +15,43 @@ _display = _ewmh.display
 _colormap = _display.screen().default_colormap
 
 
+WIN_TYPE_NORMAL = 1
+WIN_TYPE_DIALOG = 2
+WIN_TYPE_DOC = 3
+WIN_TYPE_OTHER = 4
+
+_win_normal_types = [_display.intern_atom('_NET_WM_WINDOW_TYPE_NORMAL'),
+                     _display.intern_atom('_NET_WM_WINDOW_TYPE_DND')]
+_win_dialog_types = [_display.intern_atom('_NET_WM_WINDOW_TYPE_TOOLBAR'),
+                     _display.intern_atom('_NET_WM_WINDOW_TYPE_MENU'),
+                     _display.intern_atom('_NET_WM_WINDOW_TYPE_UTILITY'),
+                     _display.intern_atom('_NET_WM_WINDOW_TYPE_SPLASH'),
+                     _display.intern_atom('_NET_WM_WINDOW_TYPE_DIALOG'),
+                     _display.intern_atom('_NET_WM_WINDOW_TYPE_DROPDOWN_MENU'),
+                     _display.intern_atom('_NET_WM_WINDOW_TYPE_POPUP_MENU'),
+                     _display.intern_atom('_NET_WM_WINDOW_TYPE_NOTIFICATION'),
+                     _display.intern_atom('_NET_WM_WINDOW_TYPE_COMBO')]
+_win_dock_types = [_display.intern_atom('_NET_WM_WINDOW_TYPE_DOCK')]
+_win_other_types = [_display.intern_atom('_NET_WM_WINDOW_TYPE_DESKTOP')]
+
+
+def _get_win_type(x_win):
+    prop = _display.intern_atom('_NET_WM_WINDOW_TYPE')
+    data = x_win.get_full_property(prop, Xatom.ATOM)
+    win_type = data.value[0]
+    if win_type in _win_normal_types:
+        return WIN_TYPE_NORMAL
+    elif win_type in _win_dialog_types:
+        return WIN_TYPE_DIALOG
+    elif win_type in _win_dock_types:
+        return WIN_TYPE_DOC
+    elif win_type in _win_other_types:
+        return WIN_TYPE_OTHER
+    else:
+        logger.warn('Invalid window type is detected: {}', win_type)
+        return -1
+
+
 def _flush():
     '''Flush window events forcibly'''
     _display.flush()
@@ -57,45 +94,16 @@ class Window(object):
         _flush()
 
     def get_type(self):
-        pass
-#         prop = _display.intern_atom('_NET_WM_WINDOW_TYPE')
-#         data = self._x_win.get_full_property(prop, Xatom.ATOM)
-#         win_type = data.value[0]
-#         if win_type == _display.intern_atom('_NET_WM_WINDOW_TYPE_DESKTOP'):
-#             return 'Desktop '
-#         if win_type == _display.intern_atom('_NET_WM_WINDOW_TYPE_DOCK'):
-#             return 'Dock '
-#         if win_type == _display.intern_atom('_NET_WM_WINDOW_TYPE_TOOLBAR'):
-#             return 'Toolbar'
-#         if win_type == _display.intern_atom('_NET_WM_WINDOW_TYPE_MENU'):
-#             return 'Menu'
-#         if win_type == _display.intern_atom('_NET_WM_WINDOW_TYPE_UTILITY'):
-#             return 'Utility'
-#         if win_type == _display.intern_atom('_NET_WM_WINDOW_TYPE_SPLASH'):
-#             return 'Splash'
-#         if win_type == _display.intern_atom('_NET_WM_WINDOW_TYPE_DIALOG'):
-#             return 'Dialog'
-#         if win_type == _display.intern_atom('_NET_WM_WINDOW_TYPE_DROPDOWN_MENU'):
-#             return 'Dropdown menu'
-#         if win_type == _display.intern_atom('_NET_WM_WINDOW_TYPE_POPUP_MENU'):
-#             return 'Popup menu'
-#         if win_type == _display.intern_atom('_NET_WM_WINDOW_TYPE_NOTIFICATION'):
-#             return 'Notification'
-#         if win_type == _display.intern_atom('_NET_WM_WINDOW_TYPE_COMBO'):
-#             return 'Combo'
-#         if win_type == _display.intern_atom('_NET_WM_WINDOW_TYPE_DND'):
-#             return 'Dnd'
-#         if win_type == _display.intern_atom('_NET_WM_WINDOW_TYPE_NORMAL'):
-#             return 'Normal'
-#         return type_str
+        return _get_win_type(self._x_win)
 
 
 class WindowController():
     '''Low level interface of controlling windows for X Window System'''
 
-    def get_window_list(self):
+    def get_window_list(self, types=[WIN_TYPE_NORMAL, WIN_TYPE_DIALOG]):
         x_wins = _ewmh.getClientListStacking()  # [Xlib.display.Window]
-        return [Window(x_win) for x_win in x_wins]
+        return [Window(x_win) for x_win in x_wins
+                if _get_win_type(x_win) in types]
 
     def get_forcused_window(self):
         x_win = _ewmh.getActiveWindow()  # Xlib.display.Window
