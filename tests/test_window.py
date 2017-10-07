@@ -7,6 +7,7 @@ import random
 
 from scripts import log_initializer
 from scripts import platforms
+from scripts.platforms.common import WindowType
 
 # logging (root)
 from logging import getLogger, DEBUG
@@ -32,7 +33,9 @@ if __name__ == '__main__':
 
     if mode == 'print_all':
         logger.info('Print all window names and types')
-        wins = w_controller.get_window_list()
+        wins = w_controller.get_window_list([WindowType.NORMAL,
+                                             WindowType.DIALOG,
+                                             WindowType.DOCK])
         for win in wins:
             logger.debug('Window: "%s"', win.get_name())
             logger.debug('  > Type: %s', win.get_type())

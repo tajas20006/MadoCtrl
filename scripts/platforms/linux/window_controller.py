@@ -42,7 +42,7 @@ def _get_win_type(xwin):
     elif win_type in _win_dialog_types:
         return WindowType.DIALOG
     elif win_type in _win_dock_types:
-        return WindowType.DOC
+        return WindowType.DOCK
     elif win_type in _win_other_types:
         return WindowType.OTHER
     else:

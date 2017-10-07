@@ -18,7 +18,31 @@ logger.addHandler(NullHandler())
 _shell = win32com.client.Dispatch("WScript.Shell")
 
 
-# Raw window types of Xlib
+def _get_win_type(hwnd):
+    # Note: No DOCK type
+
+    # Is an invalid window?
+    if not win32gui.IsWindowVisible(hwnd) or not win32gui.GetWindowText(hwnd):
+        return WindowType.OTHER
+
+    # Is non-application window?
+    if win32gui.GetParent(hwnd) != 0:
+        # Is dialog class?
+        class_name = win32gui.GetClassName(hwnd)
+        if class_name == '#32770':
+            return WindowType.DIALOG
+        else:
+            return WindowType.OTHER
+
+    # Is Floating or non-resizable?
+    style = win32gui.GetWindowLong(hwnd, win32con.GWL_STYLE)
+    ex_style = win32gui.GetWindowLong(hwnd, win32con.GWL_EXSTYLE)
+    if ex_style & win32con.WS_EX_TOOLWINDOW or \
+       ex_style & win32con.WS_EX_TOPMOST or \
+       not style & win32con.WS_SIZEBOX:
+        return WindowType.DIALOG
+    else:
+        return WindowType.NORMAL
 
 
 class Window(WindowBase):
@@ -66,7 +90,7 @@ class Window(WindowBase):
                               win32con.SWP_NOSIZE | win32con.SWP_NOZORDER)
 
     def get_type(self):
-        pass
+        return _get_win_type(self._hwnd)
 
 
 class WindowController(WindowControllerBase):
@@ -77,7 +101,7 @@ class WindowController(WindowControllerBase):
         wins = list()
 
         def enum_handler(hwnd, l_param):
-            if win32gui.IsWindowVisible(hwnd):
+            if _get_win_type(hwnd) in types:
                 wins.append(Window(hwnd))
 
         win32gui.EnumWindows(enum_handler, None)

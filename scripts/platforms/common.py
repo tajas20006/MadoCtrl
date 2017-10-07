@@ -4,7 +4,7 @@
 class WindowType(object):
     NORMAL = 1
     DIALOG = 2
-    DOC = 3
+    DOCK = 3
     OTHER = 4
 
 
