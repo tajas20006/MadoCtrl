@@ -3,6 +3,8 @@
 from Xlib import Xatom, X
 from ewmh import EWMH
 
+from ..common import WindowType, WindowBase, WindowControllerBase
+
 # logging
 from logging import getLogger, NullHandler
 logger = getLogger(__name__)
@@ -15,11 +17,7 @@ _display = _ewmh.display
 _colormap = _display.screen().default_colormap
 
 
-WIN_TYPE_NORMAL = 1
-WIN_TYPE_DIALOG = 2
-WIN_TYPE_DOC = 3
-WIN_TYPE_OTHER = 4
-
+# Raw window types of Xlib
 _win_normal_types = [_display.intern_atom('_NET_WM_WINDOW_TYPE_NORMAL'),
                      _display.intern_atom('_NET_WM_WINDOW_TYPE_DND')]
 _win_dialog_types = [_display.intern_atom('_NET_WM_WINDOW_TYPE_TOOLBAR'),
@@ -40,13 +38,13 @@ def _get_win_type(x_win):
     data = x_win.get_full_property(prop, Xatom.ATOM)
     win_type = data.value[0]
     if win_type in _win_normal_types:
-        return WIN_TYPE_NORMAL
+        return WindowType.NORMAL
     elif win_type in _win_dialog_types:
-        return WIN_TYPE_DIALOG
+        return WindowType.DIALOG
     elif win_type in _win_dock_types:
-        return WIN_TYPE_DOC
+        return WindowType.DOC
     elif win_type in _win_other_types:
-        return WIN_TYPE_OTHER
+        return WindowType.OTHER
     else:
         logger.warn('Invalid window type is detected: {}', win_type)
         return -1
@@ -57,7 +55,7 @@ def _flush():
     _display.flush()
 
 
-class Window(object):
+class Window(WindowBase):
     '''Abstracted window container for X Window System'''
 
     def __init__(self, x_win):
@@ -97,10 +95,10 @@ class Window(object):
         return _get_win_type(self._x_win)
 
 
-class WindowController():
+class WindowController(WindowControllerBase):
     '''Low level interface of controlling windows for X Window System'''
 
-    def get_window_list(self, types=[WIN_TYPE_NORMAL, WIN_TYPE_DIALOG]):
+    def get_window_list(self, types=[WindowType.NORMAL, WindowType.DIALOG]):
         x_wins = _ewmh.getClientListStacking()  # [Xlib.display.Window]
         return [Window(x_win) for x_win in x_wins
                 if _get_win_type(x_win) in types]
