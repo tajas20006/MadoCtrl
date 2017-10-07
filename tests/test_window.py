@@ -16,8 +16,9 @@ logger = getLogger(__name__)
 
 parser = argparse.ArgumentParser(description='Window controller test')
 parser.add_argument('--mode', '-m', required=True,
-                    choices=['print_all', 'focus_loop', 'geom_all',
-                             'close_focused', 'frame_toggle', 'border_all'])
+                    choices=['print_all', 'print_focused', 'focus_loop',
+                             'geom_all', 'close_focused', 'frame_toggle',
+                             'border_all'])
 args = parser.parse_args()
 
 
@@ -35,6 +36,12 @@ if __name__ == '__main__':
         for win in wins:
             logger.debug('Window: "%s"', win.get_name())
             logger.debug('  > Type: %s', win.get_type())
+
+    elif mode == 'print_focused':
+        logger.info('Print focused window names and types')
+        win = w_controller.get_forcused_window()
+        logger.debug('Window: "%s"', win.get_name())
+        logger.debug('  > Type: %s', win.get_type())
 
     elif mode == 'focus_loop':
         logger.info('Change focus over all windows')
@@ -71,4 +78,4 @@ if __name__ == '__main__':
         wins = w_controller.get_window_list()
         for win in wins:
             win.set_border()
-            time.sleep(0.01)
+            time.sleep(1)

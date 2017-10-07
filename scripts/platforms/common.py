@@ -23,7 +23,7 @@ class WindowBase(object):
     def close(self):
         NotImplemented
 
-    def set_border(self, width=2, color_code="#ff0000"):
+    def set_border(self, width=2, rgb=(255, 0, 0)):
         NotImplemented
 
     def set_frame_visib(self, visible):

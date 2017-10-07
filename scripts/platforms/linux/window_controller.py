@@ -33,9 +33,9 @@ _win_dock_types = [_display.intern_atom('_NET_WM_WINDOW_TYPE_DOCK')]
 _win_other_types = [_display.intern_atom('_NET_WM_WINDOW_TYPE_DESKTOP')]
 
 
-def _get_win_type(x_win):
+def _get_win_type(xwin):
     prop = _display.intern_atom('_NET_WM_WINDOW_TYPE')
-    data = x_win.get_full_property(prop, Xatom.ATOM)
+    data = xwin.get_full_property(prop, Xatom.ATOM)
     win_type = data.value[0]
     if win_type in _win_normal_types:
         return WindowType.NORMAL
@@ -58,28 +58,29 @@ def _flush():
 class Window(WindowBase):
     '''Abstracted window container for X Window System'''
 
-    def __init__(self, x_win):
-        self._x_win = x_win  # Xlib.display.Window
+    def __init__(self, xwin):
+        self._xwin = xwin  # Xlib.display.Window
 
     def get_name(self):
-        return self._x_win.get_wm_name()
+        return self._xwin.get_wm_name()
 
     def set_forcus(self):
-        _ewmh.setActiveWindow(self._x_win)
+        _ewmh.setActiveWindow(self._xwin)
         _flush()
 
     def set_geom(self, x, y, w, h):
-        _ewmh.setMoveResizeWindow(self._x_win, 0, x, y, w, h)
+        _ewmh.setMoveResizeWindow(self._xwin, 0, x, y, w, h)
         _flush()
 
     def close(self):
-        _ewmh.setCloseWindow(self._x_win)
+        _ewmh.setCloseWindow(self._xwin)
         _flush()
 
-    def set_border(self, width=2, color_code="#ff0000"):
-        color = _colormap.alloc_named_color(color_code).pixel
-        self._x_win.configure(border_width=width)
-        self._x_win.change_attributes(None, border_pixel=color)
+    def set_border(self, width=2, rgb=(255, 0, 0)):
+        color_code = '#%02x%02x%02x' % rgb
+        col = _colormap.alloc_named_color(color_code).pixel
+        self._xwin.configure(border_width=width)
+        self._xwin.change_attributes(None, border_pixel=col)
         _flush()
 
     def set_frame_visib(self, visible):
@@ -88,21 +89,21 @@ class Window(WindowBase):
             data = [2, 0, 1, 0, 0]  # [HINTS_DECORATIONS, 0, ON, 0, 0]
         else:
             data = [2, 0, 0, 0, 0]  # [HINTS_DECORATIONS, 0, OFF, 0, 0]
-        self._x_win.change_property(prop, prop, 32, data, X.PropModeReplace)
+        self._xwin.change_property(prop, prop, 32, data, X.PropModeReplace)
         _flush()
 
     def get_type(self):
-        return _get_win_type(self._x_win)
+        return _get_win_type(self._xwin)
 
 
 class WindowController(WindowControllerBase):
     '''Low level interface of controlling windows for X Window System'''
 
     def get_window_list(self, types=[WindowType.NORMAL, WindowType.DIALOG]):
-        x_wins = _ewmh.getClientListStacking()  # [Xlib.display.Window]
-        return [Window(x_win) for x_win in x_wins
-                if _get_win_type(x_win) in types]
+        xwins = _ewmh.getClientListStacking()
+        return [Window(xwin) for xwin in xwins
+                if _get_win_type(xwin) in types]
 
     def get_forcused_window(self):
-        x_win = _ewmh.getActiveWindow()  # Xlib.display.Window
-        return Window(x_win)
+        xwin = _ewmh.getActiveWindow()
+        return Window(xwin)
