@@ -41,10 +41,7 @@ class WindowControllerBase(object):
 class EventHandlerBase(object):
     '''Event handler for each platform'''
 
-    def __init__(self, modif_key, event_queue):
-        NotImplemented
-
-    def stop(self):
+    def __init__(self, event_queue, modif_key):
         NotImplemented
 
 

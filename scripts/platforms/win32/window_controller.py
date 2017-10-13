@@ -30,7 +30,7 @@ def _get_win_type(hwnd):
         return WindowType.OTHER
 
     # Is non-application window?
-    if win32gui.GetParent(hwnd) != 0:
+    if win32gui.GetParent(hwnd):
         # Is dialog class?
         class_name = win32gui.GetClassName(hwnd)
         if class_name == '#32770':

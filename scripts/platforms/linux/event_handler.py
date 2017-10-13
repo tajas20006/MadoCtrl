@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import threading
+
 import Xlib
 from Xlib import Xatom, X, XK
 
@@ -30,7 +31,8 @@ def _register_key_grab(keysyms):
 
 class EventHandler(EventHandlerBase):
     '''Event handler for X Window System'''
-    def __init__(self, modif_key, event_queue):
+
+    def __init__(self, event_queue, modif_key):
         logger.debug('Create EventHandler instance (modif: "%s")', modif_key)
 
         # Enable key-press and window notifications
@@ -45,20 +47,13 @@ class EventHandler(EventHandlerBase):
         self._out_event_queue = event_queue
 
         # Start event capturing loop
-        self._stop_event = threading.Event()
         self._thread = threading.Thread(target=self._event_loop, daemon=True)
         self._thread.start()
-
-    def stop(self):
-        if self._thread.is_alive():
-            self._stop_event.set()
-            logger.info('To stop event handler, please send some event')
-            self._thread.join()
 
     def _event_loop(self):
         logger.debug('Start event loop')
 
-        while not self._stop_event.is_set():
+        while True:
             # Get next event
             event = _display.next_event()
             if isinstance(event, Xlib.protocol.event.KeyPress):
@@ -83,5 +78,3 @@ class EventHandler(EventHandlerBase):
 
             # Release queued events
             _display.allow_events(Xlib.X.AsyncKeyboard, Xlib.X.CurrentTime)
-
-        logger.debug('Event loop is finished')

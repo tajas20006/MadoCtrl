@@ -16,8 +16,7 @@ logger = getLogger(__name__)
 
 
 parser = argparse.ArgumentParser(description='Event handler test')
-parser.add_argument('--mode', '-m', required=True,
-                    choices=['print_all', 'stop'])
+parser.add_argument('--mode', '-m', required=True, choices=['print_all'])
 args = parser.parse_args()
 
 
@@ -29,9 +28,9 @@ if __name__ == '__main__':
     platforms.import_modules()
 
     # Create a handler instance
-    modif = 'Ctrl'
+    modif = 'Win'
     event_queue = queue.Queue()
-    event_handler = platforms.event_handler.EventHandler(modif, event_queue)
+    event_handler = platforms.event_handler.EventHandler(event_queue, modif)
 
     if mode == 'print_all':
         logger.info('Print all events')
@@ -43,8 +42,3 @@ if __name__ == '__main__':
                 logger.debug("Window is created")
             elif event_type == EventType.WIN_DESTROY:
                 logger.debug("Window is destroyed")
-
-    elif mode == 'stop':
-        logger.info('Thread will be stopped in 3 seconds')
-        time.sleep(3)
-        event_handler.stop()
