@@ -1,11 +1,6 @@
 # -*- coding: utf-8 -*-
 
-
-class WindowType(object):
-    NORMAL = 1
-    DIALOG = 2
-    DOCK = 3
-    OTHER = 4
+from ..constants import WindowType
 
 
 class WindowBase(object):
@@ -41,3 +36,27 @@ class WindowControllerBase(object):
 
     def get_forcused_window(self):
         NotImplemented
+
+
+class EventHandlerBase(object):
+    '''Event handler for each platform'''
+
+    def __init__(self, modif_key, event_queue):
+        NotImplemented
+
+    def stop(self):
+        NotImplemented
+
+
+class SpecialKeyNames(object):
+    '''Key names to avoid ambiguity for each platform'''
+    SPACE = 'Space'
+    BACKSPACE = 'Backspace'
+    TAB = 'Tab'
+    ENTER = 'Enter'
+    ESC = 'Esc'
+    DELETE = 'Del'
+    SHIFT = 'Shift'
+    CTRL = 'Ctrl'
+    ALT = 'Alt'
+    WIN = 'Win'

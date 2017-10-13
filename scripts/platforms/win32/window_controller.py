@@ -1,12 +1,15 @@
 # -*- coding: utf-8 -*-
 
+# TODO: Replace pywin32 with ctypes.windll
+
 import win32api
 import win32con
 import win32com.client
 import win32ui
 import win32gui
 
-from ..common import WindowType, WindowBase, WindowControllerBase
+from ...constants import WindowType
+from ..base import WindowBase, WindowControllerBase
 
 # logging
 from logging import getLogger, NullHandler
@@ -19,6 +22,7 @@ _shell = win32com.client.Dispatch("WScript.Shell")
 
 
 def _get_win_type(hwnd):
+    # TODO: Improve the conditions
     # Note: No DOCK type
 
     # Is an invalid window?

@@ -2,7 +2,7 @@
 import sys
 import importlib
 
-module_names = ['window_controller', 'key_listener']
+module_names = ['window_controller', 'event_handler']
 
 
 def import_modules(platform_name=None):

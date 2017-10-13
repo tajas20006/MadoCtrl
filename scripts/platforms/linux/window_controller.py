@@ -1,18 +1,17 @@
 # -*- coding: utf-8 -*-
 
 from Xlib import Xatom, X
-from ewmh import EWMH
 
-from ..common import WindowType, WindowBase, WindowControllerBase
+from ...constants import WindowType
+from ..base import WindowBase, WindowControllerBase
+from .common import _ewmh
 
 # logging
 from logging import getLogger, NullHandler
 logger = getLogger(__name__)
 logger.addHandler(NullHandler())
 
-
 # Xlib entry point
-_ewmh = EWMH()
 _display = _ewmh.display
 _colormap = _display.screen().default_colormap
 
