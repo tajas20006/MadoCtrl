@@ -7,42 +7,63 @@ class WindowBase(object):
     '''Abstracted window container for each platform'''
 
     def get_name(self):
-        NotImplemented
+        raise NotImplemented
 
     def get_type(self):
-        NotImplemented
+        raise NotImplemented
 
-    def set_forcus(self):
-        NotImplemented
+    def set_focus(self):
+        raise NotImplemented
 
     def set_geom(self, x, y, w, h):
-        NotImplemented
+        raise NotImplemented
+
+    def get_workspace(self):
+        raise NotImplemented
+
+    def set_workspace(self, i):
+        raise NotImplemented
 
     def close(self):
-        NotImplemented
+        raise NotImplemented
 
     def set_border(self, width=2, rgb=(255, 0, 0)):
-        NotImplemented
+        raise NotImplemented
 
     def set_frame_visib(self, visible):
-        NotImplemented
+        raise NotImplemented
 
 
 class WindowControllerBase(object):
     '''Low level interface of controlling windows for each platform'''
 
     def get_window_list(self, types=[WindowType.NORMAL, WindowType.DIALOG]):
-        NotImplemented
+        raise NotImplemented
 
-    def get_forcused_window(self):
-        NotImplemented
+    def get_focused_window(self):
+        raise NotImplemented
+
+    def get_working_area(self):
+        raise NotImplemented
+
+    def get_n_workspace(self):
+        raise NotImplemented
+
+    def set_n_workspace(self, n):
+        raise NotImplemented
+
+    def get_curr_workspace(self):
+        raise NotImplemented
+
+    def set_curr_workspace(self, i):
+        raise NotImplemented
 
 
 class EventHandlerBase(object):
     '''Event handler for each platform'''
 
     def __init__(self, event_queue, modif_key):
-        NotImplemented
+        raise NotImplemented
 
 
 class SpecialKeyNames(object):

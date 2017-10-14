@@ -67,12 +67,19 @@ class Window(WindowBase):
     def get_type(self):
         return _get_win_type(self._xwin)
 
-    def set_forcus(self):
+    def set_focus(self):
         _ewmh.setActiveWindow(self._xwin)
         _flush()
 
     def set_geom(self, x, y, w, h):
         _ewmh.setMoveResizeWindow(self._xwin, 0, x, y, w, h)
+        _flush()
+
+    def get_workspace(self):
+        return _ewmh.getWmDesktop(self._xwin)
+
+    def set_workspace(self, i):
+        _ewmh.setWmDesktop(self._xwin, i)
         _flush()
 
     def close(self):
@@ -104,6 +111,43 @@ class WindowController(WindowControllerBase):
         return [Window(xwin) for xwin in xwins
                 if _get_win_type(xwin) in types]
 
-    def get_forcused_window(self):
+    def get_focused_window(self):
         xwin = _ewmh.getActiveWindow()
         return Window(xwin)
+
+    def get_working_area(self):
+        area = _ewmh.getWorkArea()
+        if area is None or len(area) == 0 or len(area) % 4 != 0:
+            # Not supported
+            logger.critical('Failed to get working area size (Not supported)' +
+                            ' (data: %s)', str(area))
+            return [0, 0, 0, 0]
+        elif len(area) == 4:
+            # Single size
+            return area
+        else:
+            # For each workspace
+            i = self.get_curr_workspace()
+            if len(area) < (i + 1) * 4:
+                logger.critical('Unknown format of working area size' +
+                                ' (data: %s)', str(area))
+                return [0, 0, 0, 0]
+            else:
+                return area[4 * i: 4 * (i + 1)]
+
+    def get_n_workspace(self):
+        return _ewmh.getNumberOfDesktops()
+
+    def set_n_workspace(self, n):
+        '''Set the number of workspaces
+            This method cannot work in some window manager such as Unity.
+        '''
+        _ewmh.setNumberOfDesktops(n)
+        _flush()
+
+    def get_curr_workspace(self):
+        return _ewmh.getCurrentDesktop()
+
+    def set_curr_workspace(self, i):
+        _ewmh.setCurrentDesktop(i)
+        _flush()

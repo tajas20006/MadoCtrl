@@ -19,7 +19,8 @@ parser = argparse.ArgumentParser(description='Window controller test')
 parser.add_argument('--mode', '-m', required=True,
                     choices=['print_all', 'print_focused', 'focus_loop',
                              'geom_all', 'close_focused', 'frame_toggle',
-                             'border_all'])
+                             'border_all', 'print_area', 'move_ws',
+                             'create_ws'])
 args = parser.parse_args()
 
 
@@ -34,7 +35,7 @@ if __name__ == '__main__':
     win_controller = platforms.window_controller.WindowController()
 
     if mode == 'print_all':
-        logger.info('Print all window names and types')
+        logger.info('Print all window names and types and working area size')
         wins = win_controller.get_window_list([WindowType.NORMAL,
                                                WindowType.DIALOG,
                                                WindowType.DOCK])
@@ -44,7 +45,7 @@ if __name__ == '__main__':
 
     elif mode == 'print_focused':
         logger.info('Print focused window names and types')
-        win = win_controller.get_forcused_window()
+        win = win_controller.get_focused_window()
         logger.debug('Window: "%s"', win.get_name())
         logger.debug('  > Type: %s', win.get_type())
 
@@ -53,7 +54,7 @@ if __name__ == '__main__':
         wins = win_controller.get_window_list()
         for win in wins:
             logger.debug(' window name: %s', win.get_name())
-            win.set_forcus()
+            win.set_focus()
             time.sleep(1)
 
     elif mode == 'geom_all':
@@ -68,12 +69,12 @@ if __name__ == '__main__':
     elif mode == 'close_focused':
         logger.info('The focused window will be closed after 3 seconds')
         time.sleep(3)
-        win = win_controller.get_forcused_window()
+        win = win_controller.get_focused_window()
         win.close()
 
     elif mode == 'frame_toggle':
         logger.info('Frame of the focused window will be hidden and appeared')
-        win = win_controller.get_forcused_window()
+        win = win_controller.get_focused_window()
         win.set_frame_visib(False)
         time.sleep(1)
         win.set_frame_visib(True)
@@ -84,3 +85,30 @@ if __name__ == '__main__':
         for win in wins:
             win.set_border()
             time.sleep(1)
+
+    elif mode == 'print_area':
+        logger.info('Print working area size')
+        working_area = win_controller.get_working_area()
+        logger.debug('Working area: %s', str(working_area))
+
+    elif mode == 'move_ws':
+        logger.info('Move focused window to the next and move back')
+        win = win_controller.get_focused_window()
+        org_ws = win.get_workspace()
+        win.set_workspace(org_ws + 1)
+        win_controller.set_curr_workspace(org_ws + 1)
+        time.sleep(1)
+        logger.debug('Move back')
+        win.set_workspace(org_ws)
+        win_controller.set_curr_workspace(org_ws)
+
+    elif mode == 'create_ws':
+        n_ws = win_controller.get_n_workspace()
+        org_ws = win_controller.get_curr_workspace()
+        logger.debug('Create extra workspace (%d -> %d)', n_ws, n_ws + 1)
+        win_controller.set_n_workspace(n_ws + 1)
+        win_controller.set_curr_workspace(n_ws)
+        logger.debug('n_ws: (%d)', win_controller.get_n_workspace())
+        time.sleep(1)
+        win_controller.set_curr_workspace(org_ws)
+        win_controller.set_n_workspace(n_ws)

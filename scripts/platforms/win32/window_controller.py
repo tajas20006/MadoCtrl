@@ -61,7 +61,7 @@ class Window(WindowBase):
     def get_type(self):
         return _get_win_type(self._hwnd)
 
-    def set_forcus(self):
+    def set_focus(self):
         try:
             # According to https://stackoverflow.com/questions/14295337/\
             #                      win32gui-setactivewindow-error-the-\
@@ -76,6 +76,12 @@ class Window(WindowBase):
     def set_geom(self, x, y, w, h):
         flags = win32con.SWP_NOACTIVATE | win32con.SWP_NOZORDER
         win32gui.SetWindowPos(self._hwnd, 0, x, y, w, h, flags)
+
+    def get_workspace(self):
+        return 1  # TODO: Implement for native workspace
+
+    def set_workspace(self, i):
+        pass  # TODO: Implement for native workspace
 
     def close(self):
         win32gui.SendMessage(self._hwnd, win32con.WM_CLOSE, 0, 0)
@@ -101,7 +107,6 @@ class WindowController(WindowControllerBase):
     '''Low level interface of controlling windows for Windows'''
 
     def get_window_list(self, types=[WindowType.NORMAL, WindowType.DIALOG]):
-        # TODO: types
         wins = list()
 
         def enum_handler(hwnd, l_param):
@@ -111,6 +116,32 @@ class WindowController(WindowControllerBase):
         win32gui.EnumWindows(enum_handler, None)
         return wins
 
-    def get_forcused_window(self):
+    def get_focused_window(self):
         hwnd = win32gui.GetForegroundWindow()
         return Window(hwnd)
+
+    def get_working_area(self):
+        monitors = win32api.EnumDisplayMonitors(None, None)
+        for i, monitor in enumerate(monitors):
+            (h_mon, _, (_, _, _, _)) = monitor
+            mon = win32api.GetMonitorInfo(h_mon)
+            if i == 0:
+                left, top, right, bottom = mon['Work']
+            else:
+                left = min(mon['Work'][0], left)
+                top = min(mon['Work'][1], top)
+                right = max(mon['Work'][2], right)
+                bottom = max(mon['Work'][3], bottom)
+        return [left, top, right, bottom]
+
+    def get_n_workspace(self):
+        return 1  # TODO: Implement for native workspace
+
+    def set_n_workspace(self, n):
+        pass  # TODO: Implement for native workspace
+
+    def get_curr_workspace(self):
+        return 1  # TODO: Implement for native workspace
+
+    def set_curr_workspace(self, i):
+        pass  # TODO: Implement for native workspace
