@@ -80,7 +80,7 @@ class KeyEventHandler(object):
             if key_name is not None:
                 self._out_event_queue.put((EventType.KEY_PRESS, key_name))
             else:
-                logger.debug('Unknown key is pressed (keycode: %d}', key_code)
+                logger.debug('Unknown key is pressed (keycode: %d)', key_code)
         return True
 
     def register_hook(self):

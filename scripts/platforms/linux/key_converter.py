@@ -20,6 +20,30 @@ KEYSYM_TABLE = {
     0xffea: SpecialKeyNames.ALT,  # right
     0xffeb: SpecialKeyNames.WIN,  # left
     0xffec: SpecialKeyNames.WIN,  # right
+    0xffbe: SpecialKeyNames.F1,
+    0xffbf: SpecialKeyNames.F2,
+    0xffc0: SpecialKeyNames.F3,
+    0xffc1: SpecialKeyNames.F4,
+    0xffc2: SpecialKeyNames.F5,
+    0xffc3: SpecialKeyNames.F6,
+    0xffc4: SpecialKeyNames.F7,
+    0xffc5: SpecialKeyNames.F8,
+    0xffc6: SpecialKeyNames.F9,
+    0xffc7: SpecialKeyNames.F10,
+    0xffc8: SpecialKeyNames.F11,
+    0xffc9: SpecialKeyNames.F12,
+    0xffca: SpecialKeyNames.F13,
+    0xffcb: SpecialKeyNames.F14,
+    0xffcc: SpecialKeyNames.F15,
+    0xffcd: SpecialKeyNames.F16,
+    0xffce: SpecialKeyNames.F17,
+    0xffcf: SpecialKeyNames.F18,
+    0xffd0: SpecialKeyNames.F19,
+    0xffd1: SpecialKeyNames.F20,
+    0xffd2: SpecialKeyNames.F21,
+    0xffd3: SpecialKeyNames.F22,
+    0xffd4: SpecialKeyNames.F23,
+    0xffd5: SpecialKeyNames.F24,
 }
 
 # Invert KEYSYM_TABLE ({name: [keycode1, keycode2, ...]})
