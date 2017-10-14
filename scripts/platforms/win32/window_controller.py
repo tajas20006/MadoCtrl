@@ -58,6 +58,9 @@ class Window(WindowBase):
     def get_name(self):
         return win32gui.GetWindowText(self._hwnd)
 
+    def get_type(self):
+        return _get_win_type(self._hwnd)
+
     def set_forcus(self):
         try:
             # According to https://stackoverflow.com/questions/14295337/\
@@ -92,9 +95,6 @@ class Window(WindowBase):
         win32gui.SetWindowPos(self._hwnd, 0, 0, 0, 0, 0,
                               win32con.SWP_FRAMECHANGED | win32con.SWP_NOMOVE |
                               win32con.SWP_NOSIZE | win32con.SWP_NOZORDER)
-
-    def get_type(self):
-        return _get_win_type(self._hwnd)
 
 
 class WindowController(WindowControllerBase):

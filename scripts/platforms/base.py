@@ -9,6 +9,9 @@ class WindowBase(object):
     def get_name(self):
         NotImplemented
 
+    def get_type(self):
+        NotImplemented
+
     def set_forcus(self):
         NotImplemented
 
@@ -22,9 +25,6 @@ class WindowBase(object):
         NotImplemented
 
     def set_frame_visib(self, visible):
-        NotImplemented
-
-    def get_type(self):
         NotImplemented
 
 

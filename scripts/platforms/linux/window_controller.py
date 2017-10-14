@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+# TODO: Replace ewmh with xlib
+
 from Xlib import Xatom, X
 
 from ...constants import WindowType
@@ -35,18 +37,17 @@ _win_other_types = [_display.intern_atom('_NET_WM_WINDOW_TYPE_DESKTOP')]
 def _get_win_type(xwin):
     prop = _display.intern_atom('_NET_WM_WINDOW_TYPE')
     data = xwin.get_full_property(prop, Xatom.ATOM)
-    win_type = data.value[0]
-    if win_type in _win_normal_types:
-        return WindowType.NORMAL
-    elif win_type in _win_dialog_types:
-        return WindowType.DIALOG
-    elif win_type in _win_dock_types:
-        return WindowType.DOCK
-    elif win_type in _win_other_types:
-        return WindowType.OTHER
-    else:
-        logger.warn('Invalid window type is detected: {}', win_type)
-        return -1
+    for win_type in data.value:
+        if win_type in _win_normal_types:
+            return WindowType.NORMAL
+        elif win_type in _win_dialog_types:
+            return WindowType.DIALOG
+        elif win_type in _win_dock_types:
+            return WindowType.DOCK
+        elif win_type in _win_other_types:
+            return WindowType.OTHER
+    logger.warn('No invalid window type was found: %d', win_type)
+    return WindowType.OTHER
 
 
 def _flush():
@@ -61,7 +62,10 @@ class Window(WindowBase):
         self._xwin = xwin  # Xlib.display.Window
 
     def get_name(self):
-        return self._xwin.get_wm_name()
+        return _ewmh.getWmName(self._xwin).decode('utf-8')
+
+    def get_type(self):
+        return _get_win_type(self._xwin)
 
     def set_forcus(self):
         _ewmh.setActiveWindow(self._xwin)
@@ -90,9 +94,6 @@ class Window(WindowBase):
             data = [2, 0, 0, 0, 0]  # [HINTS_DECORATIONS, 0, OFF, 0, 0]
         self._xwin.change_property(prop, prop, 32, data, X.PropModeReplace)
         _flush()
-
-    def get_type(self):
-        return _get_win_type(self._xwin)
 
 
 class WindowController(WindowControllerBase):
