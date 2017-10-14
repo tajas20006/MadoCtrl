@@ -77,14 +77,14 @@ class Window(WindowBase):
         flags = win32con.SWP_NOACTIVATE | win32con.SWP_NOZORDER
         win32gui.SetWindowPos(self._hwnd, 0, x, y, w, h, flags)
 
+    def close(self):
+        win32gui.SendMessage(self._hwnd, win32con.WM_CLOSE, 0, 0)
+
     def get_workspace(self):
         return 1  # TODO: Implement for native workspace
 
     def set_workspace(self, i):
         pass  # TODO: Implement for native workspace
-
-    def close(self):
-        win32gui.SendMessage(self._hwnd, win32con.WM_CLOSE, 0, 0)
 
     def set_border(self, width=2, rgb=(255, 0, 0)):
         # TODO: Set border width

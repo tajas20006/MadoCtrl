@@ -18,13 +18,16 @@ class WindowBase(object):
     def set_geom(self, x, y, w, h):
         raise NotImplemented
 
+    def close(self):
+        raise NotImplemented
+
+    def set_fullscreen(self):
+        raise NotImplemented
+
     def get_workspace(self):
         raise NotImplemented
 
     def set_workspace(self, i):
-        raise NotImplemented
-
-    def close(self):
         raise NotImplemented
 
     def set_border(self, width=2, rgb=(255, 0, 0)):

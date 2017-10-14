@@ -75,15 +75,20 @@ class Window(WindowBase):
         _ewmh.setMoveResizeWindow(self._xwin, 0, x, y, w, h)
         _flush()
 
+    def close(self):
+        _ewmh.setCloseWindow(self._xwin)
+        _flush()
+
+    def set_fullscreen(self, on):
+        action = 1 if on else 0
+        _ewmh.setWmState(self._xwin, action, '_NET_WM_STATE_FULLSCREEN')
+        _flush()
+
     def get_workspace(self):
         return _ewmh.getWmDesktop(self._xwin)
 
     def set_workspace(self, i):
         _ewmh.setWmDesktop(self._xwin, i)
-        _flush()
-
-    def close(self):
-        _ewmh.setCloseWindow(self._xwin)
         _flush()
 
     def set_border(self, width=2, rgb=(255, 0, 0)):

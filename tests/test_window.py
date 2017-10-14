@@ -18,9 +18,9 @@ logger = getLogger(__name__)
 parser = argparse.ArgumentParser(description='Window controller test')
 parser.add_argument('--mode', '-m', required=True,
                     choices=['print_all', 'print_focused', 'focus_loop',
-                             'geom_all', 'close_focused', 'frame_toggle',
-                             'border_all', 'print_area', 'move_ws',
-                             'create_ws'])
+                             'geom_all', 'close_focused', 'toggle_fullscreen',
+                             'frame_toggle', 'border_all', 'print_area',
+                             'move_ws', 'create_ws', ])
 args = parser.parse_args()
 
 
@@ -71,6 +71,13 @@ if __name__ == '__main__':
         time.sleep(3)
         win = win_controller.get_focused_window()
         win.close()
+
+    elif mode == 'toggle_fullscreen':
+        logger.info('The focused window will be fullscreen')
+        win = win_controller.get_focused_window()
+        win.set_fullscreen(True)
+        time.sleep(1)
+        win.set_fullscreen(False)
 
     elif mode == 'frame_toggle':
         logger.info('Frame of the focused window will be hidden and appeared')
