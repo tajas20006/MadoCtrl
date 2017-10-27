@@ -10,7 +10,7 @@ import win32gui
 
 from ...constants import WindowType
 from ..base import WindowBase, WindowControllerBase
-from .pseudo_workspace import PseudoWorkspace
+from .common import _pseudo_ws, get_win_type
 
 # logging
 from logging import getLogger, NullHandler
@@ -21,46 +21,17 @@ logger.addHandler(NullHandler())
 _shell = win32com.client.Dispatch("WScript.Shell")
 
 
-def _get_win_type(hwnd):
-    # TODO: Improve the conditions
-    # Note: No DOCK type
-
-    # Is an invalid window?
-    if not win32gui.IsWindowVisible(hwnd) or not win32gui.GetWindowText(hwnd):
-        return WindowType.OTHER
-
-    # Is non-application window?
-    if win32gui.GetParent(hwnd):
-        # Is dialog class?
-        class_name = win32gui.GetClassName(hwnd)
-        if class_name == '#32770':
-            return WindowType.DIALOG
-        else:
-            return WindowType.OTHER
-
-    # Is Floating or non-resizable?
-    style = win32gui.GetWindowLong(hwnd, win32con.GWL_STYLE)
-    ex_style = win32gui.GetWindowLong(hwnd, win32con.GWL_EXSTYLE)
-    if ex_style & win32con.WS_EX_TOOLWINDOW or \
-       ex_style & win32con.WS_EX_TOPMOST or \
-       not style & win32con.WS_SIZEBOX:
-        return WindowType.DIALOG
-    else:
-        return WindowType.NORMAL
-
-
 class Window(WindowBase):
     '''Abstracted window container for Windows'''
 
-    def __init__(self, hwnd, pseudo_ws):
+    def __init__(self, hwnd):
         self._hwnd = hwnd
-        self._pseudo_ws = pseudo_ws  # Reference
 
     def get_name(self):
         return win32gui.GetWindowText(self._hwnd)
 
     def get_type(self):
-        return _get_win_type(self._hwnd)
+        return get_win_type(self._hwnd)
 
     def set_focus(self):
         try:
@@ -82,10 +53,10 @@ class Window(WindowBase):
         win32gui.SendMessage(self._hwnd, win32con.WM_CLOSE, 0, 0)
 
     def get_workspace(self):
-        return self._pseudo_ws.get_win_ws(self._hwnd)
+        return _pseudo_ws.get_win_ws(self._hwnd)
 
     def set_workspace(self, i):
-        self._pseudo_ws.set_win_ws(self._hwnd, i)
+        _pseudo_ws.set_win_ws(self._hwnd, i)
 
     def set_border(self, width=2, rgb=(255, 0, 0)):
         # TODO: Set border width
@@ -107,34 +78,25 @@ class Window(WindowBase):
 class WindowController(WindowControllerBase):
     '''Low level interface of controlling windows for Windows'''
 
-    def __init__(self):
-        # Pseudo workspace
-        self._pseudo_ws = PseudoWorkspace()
-
-    def get_window_list(self, types=[WindowType.NORMAL, WindowType.DIALOG]):
+    @classmethod
+    def get_window_list(cls, types=[WindowType.NORMAL, WindowType.DIALOG]):
         wins = list()
 
         def enum_handler(hwnd, l_param):
-            if _get_win_type(hwnd) in types:
-                win = Window(hwnd, self._pseudo_ws)
+            if get_win_type(hwnd) in types:
+                win = Window(hwnd)
                 wins.append(win)
         win32gui.EnumWindows(enum_handler, None)
 
-        # Update pseudo workspace
-        self._pseudo_ws.update_wins(wins)
-
         return wins
 
-    def get_focused_window(self):
+    @classmethod
+    def get_focused_window(cls):
         hwnd = win32gui.GetForegroundWindow()
-        win = Window(hwnd, self._pseudo_ws)
+        return Window(hwnd)
 
-        # Update pseudo workspace
-        self._pseudo_ws.update_win(win)
-
-        return win
-
-    def get_working_area(self):
+    @classmethod
+    def get_working_area(cls):
         monitors = win32api.EnumDisplayMonitors(None, None)
         for i, monitor in enumerate(monitors):
             (h_mon, _, (_, _, _, _)) = monitor
@@ -148,14 +110,18 @@ class WindowController(WindowControllerBase):
                 bottom = max(mon['Work'][3], bottom)
         return [left, top, right, bottom]
 
-    def get_n_workspace(self):
-        return self._pseudo_ws.get_n_workspace()
+    @classmethod
+    def get_n_workspace(cls):
+        return _pseudo_ws.get_n_workspace()
 
-    def set_n_workspace(self, n):
-        self._pseudo_ws.set_n_workspace(n)
+    @classmethod
+    def set_n_workspace(cls, n):
+        _pseudo_ws.set_n_workspace(n)
 
-    def get_curr_workspace(self):
-        return self._pseudo_ws.get_curr_workspace()
+    @classmethod
+    def get_curr_workspace(cls):
+        return _pseudo_ws.get_curr_workspace()
 
-    def set_curr_workspace(self, i):
-        self._pseudo_ws.set_curr_workspace(i)
+    @classmethod
+    def set_curr_workspace(cls, i):
+        _pseudo_ws.set_curr_workspace(i)

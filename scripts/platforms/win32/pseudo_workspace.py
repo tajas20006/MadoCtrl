@@ -11,16 +11,21 @@ logger.addHandler(NullHandler())
 
 class PseudoWorkspace(object):
 
-    def __init__(self):
+    def __init__(self, wins=None):
         self._ws_dict = dict()
         self._ws_idx = 0
         self._n_ws = 1
+        if wins is not None:
+            self.update_wins(wins)
+
+    def update_win_raw(self, hwnd):
+        # Register new window
+        if hwnd not in self._ws_dict:
+            self.set_win_ws(hwnd, self._ws_idx)
+            self._update_win_showing_status(hwnd)  # Update one showing status
 
     def update_win(self, win):
-        # Register new window
-        if win._hwnd not in self._ws_dict:
-            self.set_win_ws(win._hwnd, self._ws_idx)
-            self._update_win_showing_status(win._hwnd)
+        self.update_win_raw(win._hwnd)
 
     def update_wins(self, wins):
         # Register new windows
@@ -36,7 +41,11 @@ class PseudoWorkspace(object):
                 del self._ws_dict[hwnd]
 
     def get_win_ws(self, hwnd):
-        return self._ws_dict[hwnd]
+        if hwnd in self._ws_dict:
+            return self._ws_dict[hwnd]
+        else:
+            logger.error("PseudoWorkspace dose not controll (hwnd: %d)", hwnd)
+            return 0
 
     def set_win_ws(self, hwnd, i):
         self._ws_dict[hwnd] = i

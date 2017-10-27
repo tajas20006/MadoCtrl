@@ -9,9 +9,11 @@ from ctypes import windll
 import win32con
 import win32gui
 
-from ...constants import EventType
+from ...constants import EventType, WindowType
 from ..base import EventHandlerBase
 from .key_converter import interpret_keycode, interpret_keyname
+from .common import _pseudo_ws, get_win_type
+from .window_controller import WindowController
 
 # logging
 from logging import getLogger, NullHandler
@@ -103,12 +105,18 @@ class WindowEventHandler(object):
         # Output queue
         self._out_event_queue = event_queue
 
+        # Update pseudo workspace initially
+        wins = WindowController.get_window_list()
+        _pseudo_ws.update_wins(wins)
+
     def _win_callback(self, h_win_event_hook, event, hwnd, id_object, id_child,
                       dw_event_thread, dwms_event_time):
         # Ignore non application windows
-        if not win32gui.IsWindowVisible(hwnd) or \
-           not win32gui.GetWindowText(hwnd):
+        if get_win_type(hwnd) in [WindowType.OTHER, WindowType.DOCK]:
             return
+
+        # Update pseudo workspace
+        _pseudo_ws.update_win_raw(hwnd)
 
         # Send create / destroy event
         if event == win32con.EVENT_OBJECT_CREATE:

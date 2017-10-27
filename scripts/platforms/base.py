@@ -47,39 +47,39 @@ class WindowBase(metaclass=ABCMeta):
 class WindowControllerBase(metaclass=ABCMeta):
     '''Low level interface of controlling windows for each platform'''
 
-    @staticmethod
+    @classmethod
     @abstractmethod
-    def get_window_list(self, types=[WindowType.NORMAL, WindowType.DIALOG]):
+    def get_window_list(cls, types=[WindowType.NORMAL, WindowType.DIALOG]):
         pass
 
-    @staticmethod
+    @classmethod
     @abstractmethod
-    def get_focused_window(self):
+    def get_focused_window(cls):
         pass
 
-    @staticmethod
+    @classmethod
     @abstractmethod
-    def get_working_area(self):
+    def get_working_area(cls):
         pass
 
-    @staticmethod
+    @classmethod
     @abstractmethod
-    def get_n_workspace(self):
+    def get_n_workspace(cls):
         pass
 
-    @staticmethod
+    @classmethod
     @abstractmethod
-    def set_n_workspace(self, n):
+    def set_n_workspace(cls, n):
         pass
 
-    @staticmethod
+    @classmethod
     @abstractmethod
-    def get_curr_workspace(self):
+    def get_curr_workspace(cls):
         pass
 
-    @staticmethod
+    @classmethod
     @abstractmethod
-    def set_curr_workspace(self, i):
+    def set_curr_workspace(cls, i):
         pass
 
 

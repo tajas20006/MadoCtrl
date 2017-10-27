@@ -107,16 +107,19 @@ class Window(WindowBase):
 class WindowController(WindowControllerBase):
     '''Low level interface of controlling windows for X Window System'''
 
-    def get_window_list(self, types=[WindowType.NORMAL, WindowType.DIALOG]):
+    @classmethod
+    def get_window_list(cls, types=[WindowType.NORMAL, WindowType.DIALOG]):
         xwins = _ewmh.getClientListStacking()
         return [Window(xwin) for xwin in xwins
                 if _get_win_type(xwin) in types]
 
-    def get_focused_window(self):
+    @classmethod
+    def get_focused_window(cls):
         xwin = _ewmh.getActiveWindow()
         return Window(xwin)
 
-    def get_working_area(self):
+    @classmethod
+    def get_working_area(cls):
         area = _ewmh.getWorkArea()
         if area is None or len(area) == 0 or len(area) % 4 != 0:
             # Not supported
@@ -128,7 +131,7 @@ class WindowController(WindowControllerBase):
             return area
         else:
             # For each workspace
-            i = self.get_curr_workspace()
+            i = cls.get_curr_workspace()
             if len(area) < (i + 1) * 4:
                 logger.critical('Unknown format of working area size' +
                                 ' (data: %s)', str(area))
@@ -136,19 +139,23 @@ class WindowController(WindowControllerBase):
             else:
                 return area[4 * i: 4 * (i + 1)]
 
-    def get_n_workspace(self):
+    @classmethod
+    def get_n_workspace(cls):
         return _ewmh.getNumberOfDesktops()
 
-    def set_n_workspace(self, n):
+    @classmethod
+    def set_n_workspace(cls, n):
         '''Set the number of workspaces
             This method cannot work in some window manager such as Unity.
         '''
         _ewmh.setNumberOfDesktops(n)
         _flush()
 
-    def get_curr_workspace(self):
+    @classmethod
+    def get_curr_workspace(cls):
         return _ewmh.getCurrentDesktop()
 
-    def set_curr_workspace(self, i):
+    @classmethod
+    def set_curr_workspace(cls, i):
         _ewmh.setCurrentDesktop(i)
         _flush()
