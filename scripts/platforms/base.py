@@ -1,107 +1,91 @@
 # -*- coding: utf-8 -*-
+from abc import ABCMeta, abstractmethod
 
 from ..constants import WindowType
 
 
-class WindowBase(object):
+class WindowBase(metaclass=ABCMeta):
     '''Abstracted window container for each platform'''
 
+    @abstractmethod
     def get_name(self):
-        raise NotImplemented
+        pass
 
+    @abstractmethod
     def get_type(self):
-        raise NotImplemented
+        pass
 
+    @abstractmethod
     def set_focus(self):
-        raise NotImplemented
+        pass
 
+    @abstractmethod
     def set_geom(self, x, y, w, h):
-        raise NotImplemented
+        pass
 
+    @abstractmethod
     def close(self):
-        raise NotImplemented
+        pass
 
-    def set_fullscreen(self):
-        raise NotImplemented
-
+    @abstractmethod
     def get_workspace(self):
-        raise NotImplemented
+        pass
 
+    @abstractmethod
     def set_workspace(self, i):
-        raise NotImplemented
+        pass
 
+    @abstractmethod
     def set_border(self, width=2, rgb=(255, 0, 0)):
-        raise NotImplemented
+        pass
 
+    @abstractmethod
     def set_frame_visib(self, visible):
-        raise NotImplemented
+        pass
 
 
-class WindowControllerBase(object):
+class WindowControllerBase(metaclass=ABCMeta):
     '''Low level interface of controlling windows for each platform'''
 
+    @staticmethod
+    @abstractmethod
     def get_window_list(self, types=[WindowType.NORMAL, WindowType.DIALOG]):
-        raise NotImplemented
+        pass
 
+    @staticmethod
+    @abstractmethod
     def get_focused_window(self):
-        raise NotImplemented
+        pass
 
+    @staticmethod
+    @abstractmethod
     def get_working_area(self):
-        raise NotImplemented
+        pass
 
+    @staticmethod
+    @abstractmethod
     def get_n_workspace(self):
-        raise NotImplemented
+        pass
 
+    @staticmethod
+    @abstractmethod
     def set_n_workspace(self, n):
-        raise NotImplemented
+        pass
 
+    @staticmethod
+    @abstractmethod
     def get_curr_workspace(self):
-        raise NotImplemented
+        pass
 
+    @staticmethod
+    @abstractmethod
     def set_curr_workspace(self, i):
-        raise NotImplemented
+        pass
 
 
-class EventHandlerBase(object):
+class EventHandlerBase(metaclass=ABCMeta):
     '''Event handler for each platform'''
 
+    @abstractmethod
     def __init__(self, event_queue, modif_key):
-        raise NotImplemented
-
-
-class SpecialKeyNames(object):
-    '''Key names to avoid ambiguity for each platform'''
-    SPACE = 'Space'
-    BACKSPACE = 'Backspace'
-    TAB = 'Tab'
-    ENTER = 'Enter'
-    ESC = 'Esc'
-    DELETE = 'Del'
-    SHIFT = 'Shift'
-    CTRL = 'Ctrl'
-    ALT = 'Alt'
-    WIN = 'Win'
-    F1 = 'F1'
-    F2 = 'F2'
-    F3 = 'F3'
-    F4 = 'F4'
-    F5 = 'F5'
-    F6 = 'F6'
-    F7 = 'F7'
-    F8 = 'F8'
-    F9 = 'F9'
-    F10 = 'F10'
-    F11 = 'F11'
-    F12 = 'F12'
-    F13 = 'F13'
-    F14 = 'F14'
-    F15 = 'F15'
-    F16 = 'F16'
-    F17 = 'F17'
-    F18 = 'F18'
-    F19 = 'F19'
-    F20 = 'F20'
-    F21 = 'F21'
-    F22 = 'F22'
-    F23 = 'F23'
-    F24 = 'F24'
+        pass

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from ..base import SpecialKeyNames
+from ...constants import SpecialKeyNames
 
 KEYCODE_TABLE = {
     0x08: SpecialKeyNames.BACKSPACE,

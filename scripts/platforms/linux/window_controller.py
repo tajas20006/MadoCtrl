@@ -79,11 +79,6 @@ class Window(WindowBase):
         _ewmh.setCloseWindow(self._xwin)
         _flush()
 
-    def set_fullscreen(self, on):
-        action = 1 if on else 0
-        _ewmh.setWmState(self._xwin, action, '_NET_WM_STATE_FULLSCREEN')
-        _flush()
-
     def get_workspace(self):
         return _ewmh.getWmDesktop(self._xwin)
 
@@ -92,6 +87,7 @@ class Window(WindowBase):
         _flush()
 
     def set_border(self, width=2, rgb=(255, 0, 0)):
+        # TODO: Dose not work in xfce4
         color_code = '#%02x%02x%02x' % rgb
         col = _colormap.alloc_named_color(color_code).pixel
         self._xwin.configure(border_width=width)

@@ -10,12 +10,12 @@ import win32gui
 
 from ...constants import WindowType
 from ..base import WindowBase, WindowControllerBase
+from .pseudo_workspace import PseudoWorkspace
 
 # logging
 from logging import getLogger, NullHandler
 logger = getLogger(__name__)
 logger.addHandler(NullHandler())
-
 
 # Win32API entry point
 _shell = win32com.client.Dispatch("WScript.Shell")
@@ -52,8 +52,9 @@ def _get_win_type(hwnd):
 class Window(WindowBase):
     '''Abstracted window container for Windows'''
 
-    def __init__(self, hwnd):
+    def __init__(self, hwnd, pseudo_ws):
         self._hwnd = hwnd
+        self._pseudo_ws = pseudo_ws  # Reference
 
     def get_name(self):
         return win32gui.GetWindowText(self._hwnd)
@@ -81,10 +82,10 @@ class Window(WindowBase):
         win32gui.SendMessage(self._hwnd, win32con.WM_CLOSE, 0, 0)
 
     def get_workspace(self):
-        return 1  # TODO: Implement for native workspace
+        return self._pseudo_ws.get_win_ws(self._hwnd)
 
     def set_workspace(self, i):
-        pass  # TODO: Implement for native workspace
+        self._pseudo_ws.set_win_ws(self._hwnd, i)
 
     def set_border(self, width=2, rgb=(255, 0, 0)):
         # TODO: Set border width
@@ -106,19 +107,32 @@ class Window(WindowBase):
 class WindowController(WindowControllerBase):
     '''Low level interface of controlling windows for Windows'''
 
+    def __init__(self):
+        # Pseudo workspace
+        self._pseudo_ws = PseudoWorkspace()
+
     def get_window_list(self, types=[WindowType.NORMAL, WindowType.DIALOG]):
         wins = list()
 
         def enum_handler(hwnd, l_param):
             if _get_win_type(hwnd) in types:
-                wins.append(Window(hwnd))
-
+                win = Window(hwnd, self._pseudo_ws)
+                wins.append(win)
         win32gui.EnumWindows(enum_handler, None)
+
+        # Update pseudo workspace
+        self._pseudo_ws.update_wins(wins)
+
         return wins
 
     def get_focused_window(self):
         hwnd = win32gui.GetForegroundWindow()
-        return Window(hwnd)
+        win = Window(hwnd, self._pseudo_ws)
+
+        # Update pseudo workspace
+        self._pseudo_ws.update_win(win)
+
+        return win
 
     def get_working_area(self):
         monitors = win32api.EnumDisplayMonitors(None, None)
@@ -135,13 +149,13 @@ class WindowController(WindowControllerBase):
         return [left, top, right, bottom]
 
     def get_n_workspace(self):
-        return 1  # TODO: Implement for native workspace
+        return self._pseudo_ws.get_n_workspace()
 
     def set_n_workspace(self, n):
-        pass  # TODO: Implement for native workspace
+        self._pseudo_ws.set_n_workspace(n)
 
     def get_curr_workspace(self):
-        return 1  # TODO: Implement for native workspace
+        return self._pseudo_ws.get_curr_workspace()
 
     def set_curr_workspace(self, i):
-        pass  # TODO: Implement for native workspace
+        self._pseudo_ws.set_curr_workspace(i)

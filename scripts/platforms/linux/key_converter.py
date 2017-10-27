@@ -2,7 +2,7 @@
 
 from Xlib import XK
 
-from ..base import SpecialKeyNames
+from ...constants import SpecialKeyNames
 
 # Created with `X11.keysymdef.h`
 KEYSYM_TABLE = {
