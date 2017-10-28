@@ -13,7 +13,7 @@ from ...constants import EventType, WindowType
 from ..base import EventHandlerBase
 from .key_converter import interpret_keycode, interpret_keyname
 from .common import _pseudo_ws, get_win_type
-from .window_controller import WindowController
+from .window_controller import Window, WindowController
 
 # logging
 from logging import getLogger, NullHandler
@@ -111,18 +111,17 @@ class WindowEventHandler(object):
 
     def _win_callback(self, h_win_event_hook, event, hwnd, id_object, id_child,
                       dw_event_thread, dwms_event_time):
-        # Ignore non application windows
-        if get_win_type(hwnd) in [WindowType.OTHER, WindowType.DOCK]:
-            return
+        # Deal with only application windows
+        if get_win_type(hwnd) in [WindowType.NORMAL, WindowType.DIALOG]:
 
-        # Update pseudo workspace
-        _pseudo_ws.update_win_raw(hwnd)
+            # Update pseudo workspace
+            _pseudo_ws.update_win_raw(hwnd)
 
-        # Send create / destroy event
-        if event == win32con.EVENT_OBJECT_CREATE:
-            self._out_event_queue.put((EventType.WIN_CREATE, None))
-        elif event == win32con.EVENT_OBJECT_DESTROY:
-            self._out_event_queue.put((EventType.WIN_DESTROY, None))
+            # Send create / destroy event
+            if event == win32con.EVENT_OBJECT_CREATE:
+                self._out_event_queue.put((EventType.WIN_CREATE, None))
+            elif event == win32con.EVENT_OBJECT_DESTROY:
+                self._out_event_queue.put((EventType.WIN_DESTROY, None))
 
     def register_hook(self):
         # Wrap and avoid auto-releasing

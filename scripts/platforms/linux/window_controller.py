@@ -6,7 +6,7 @@ from Xlib import Xatom, X
 
 from ...constants import WindowType
 from ..base import WindowBase, WindowControllerBase
-from .common import _ewmh
+from .common import _ewmh, get_win_type
 
 # logging
 from logging import getLogger, NullHandler
@@ -16,38 +16,6 @@ logger.addHandler(NullHandler())
 # Xlib entry point
 _display = _ewmh.display
 _colormap = _display.screen().default_colormap
-
-
-# Raw window types of Xlib
-_win_normal_types = [_display.intern_atom('_NET_WM_WINDOW_TYPE_NORMAL'),
-                     _display.intern_atom('_NET_WM_WINDOW_TYPE_DND')]
-_win_dialog_types = [_display.intern_atom('_NET_WM_WINDOW_TYPE_TOOLBAR'),
-                     _display.intern_atom('_NET_WM_WINDOW_TYPE_MENU'),
-                     _display.intern_atom('_NET_WM_WINDOW_TYPE_UTILITY'),
-                     _display.intern_atom('_NET_WM_WINDOW_TYPE_SPLASH'),
-                     _display.intern_atom('_NET_WM_WINDOW_TYPE_DIALOG'),
-                     _display.intern_atom('_NET_WM_WINDOW_TYPE_DROPDOWN_MENU'),
-                     _display.intern_atom('_NET_WM_WINDOW_TYPE_POPUP_MENU'),
-                     _display.intern_atom('_NET_WM_WINDOW_TYPE_NOTIFICATION'),
-                     _display.intern_atom('_NET_WM_WINDOW_TYPE_COMBO')]
-_win_dock_types = [_display.intern_atom('_NET_WM_WINDOW_TYPE_DOCK')]
-_win_other_types = [_display.intern_atom('_NET_WM_WINDOW_TYPE_DESKTOP')]
-
-
-def _get_win_type(xwin):
-    prop = _display.intern_atom('_NET_WM_WINDOW_TYPE')
-    data = xwin.get_full_property(prop, Xatom.ATOM)
-    for win_type in data.value:
-        if win_type in _win_normal_types:
-            return WindowType.NORMAL
-        elif win_type in _win_dialog_types:
-            return WindowType.DIALOG
-        elif win_type in _win_dock_types:
-            return WindowType.DOCK
-        elif win_type in _win_other_types:
-            return WindowType.OTHER
-    logger.warn('No invalid window type was found: %d', win_type)
-    return WindowType.OTHER
 
 
 def _flush():
@@ -65,7 +33,7 @@ class Window(WindowBase):
         return _ewmh.getWmName(self._xwin).decode('utf-8')
 
     def get_type(self):
-        return _get_win_type(self._xwin)
+        return get_win_type(self._xwin)
 
     def set_focus(self):
         _ewmh.setActiveWindow(self._xwin)
@@ -111,7 +79,7 @@ class WindowController(WindowControllerBase):
     def get_window_list(cls, types=[WindowType.NORMAL, WindowType.DIALOG]):
         xwins = _ewmh.getClientListStacking()
         return [Window(xwin) for xwin in xwins
-                if _get_win_type(xwin) in types]
+                if get_win_type(xwin) in types]
 
     @classmethod
     def get_focused_window(cls):
@@ -120,6 +88,7 @@ class WindowController(WindowControllerBase):
 
     @classmethod
     def get_working_area(cls):
+        # TODO: Consider multi display
         area = _ewmh.getWorkArea()
         if area is None or len(area) == 0 or len(area) % 4 != 0:
             # Not supported
@@ -130,7 +99,7 @@ class WindowController(WindowControllerBase):
             # Single size
             return area
         else:
-            # For each workspace
+            # Select current workspace size
             i = cls.get_curr_workspace()
             if len(area) < (i + 1) * 4:
                 logger.critical('Unknown format of working area size' +

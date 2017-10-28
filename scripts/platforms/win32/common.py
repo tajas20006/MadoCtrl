@@ -14,23 +14,6 @@ from .pseudo_workspace import PseudoWorkspace
 _pseudo_ws = PseudoWorkspace()
 
 
-# Store default hidden windows
-class DefaultHiddenWinows:
-    def __init__(self):
-        self._wins = list()
-
-        def enum_handler(hwnd, l_param):
-            if not win32gui.IsWindowVisible(hwnd):
-                self._wins.append(hwnd)
-        win32gui.EnumWindows(enum_handler, None)
-
-    def check(self, hwnd):
-        return hwnd in self._wins
-
-
-_default_hidden_wins = DefaultHiddenWinows()
-
-
 # Window type judger
 class TitlebarInfoType(ctypes.Structure):
     pass
@@ -43,24 +26,44 @@ TitlebarInfoType._fields_ = [
 ]
 
 
+# Store default ignoring windows
+class DefaultIgnoreWinows:
+    def __init__(self):
+        self._wins = list()
+
+        def enum_handler(hwnd, l_param):
+            # Hidden window
+            if not win32gui.IsWindowVisible(hwnd):
+                self._wins.append(hwnd)
+                return
+            # Window which dose not have title bar
+            bar_info = TitlebarInfoType()
+            bar_info.cbSize = ctypes.sizeof(bar_info)
+            ctypes.windll.user32.GetTitleBarInfo(hwnd, ctypes.byref(bar_info))
+            if bar_info.rgstate[0] & win32con.STATE_SYSTEM_INVISIBLE:
+                self._wins.append(hwnd)
+                return
+
+        win32gui.EnumWindows(enum_handler, None)
+
+    def check(self, hwnd):
+        return hwnd in self._wins
+
+
+_default_ignore_wins = DefaultIgnoreWinows()
+
+
 def get_win_type(hwnd):
     # TODO: Improve the conditions
     # Note: No DOCK type
 
-    # Is default hidden window?
-    if _default_hidden_wins.check(hwnd):
+    # Is default ignore window?
+    if _default_ignore_wins.check(hwnd):
         return WindowType.OTHER
 
     # Is an invalid window?
     if not win32gui.IsWindow(hwnd) or not win32gui.IsWindowEnabled(hwnd) or \
        not win32gui.GetWindowText(hwnd):
-        return WindowType.OTHER
-
-    # Detect desktop and task tray application
-    title_info = TitlebarInfoType()
-    title_info.cbSize = ctypes.sizeof(title_info)
-    ctypes.windll.user32.GetTitleBarInfo(hwnd, ctypes.byref(title_info))
-    if title_info.rgstate[0] & win32con.STATE_SYSTEM_INVISIBLE:
         return WindowType.OTHER
 
     # Is specific class?

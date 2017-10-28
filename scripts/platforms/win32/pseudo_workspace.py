@@ -66,7 +66,7 @@ class PseudoWorkspace(object):
 
     def _update_win_showing_status(self, hwnd):
         if self._ws_idx == self.get_win_ws(hwnd):
-            win32gui.ShowWindow(hwnd, win32con.SW_SHOW)
+            win32gui.ShowWindow(hwnd, win32con.SW_SHOWNA)
         else:
             win32gui.ShowWindow(hwnd, win32con.SW_HIDE)
 

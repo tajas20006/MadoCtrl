@@ -5,10 +5,11 @@ import threading
 import Xlib
 from Xlib import Xatom, X, XK
 
-from ...constants import EventType
+from ...constants import EventType, WindowType
 from ..base import EventHandlerBase
-from .common import _ewmh
+from .common import _ewmh, get_win_type
 from .key_converter import interpret_keysym, interpret_keyname
+from .window_controller import Window
 
 # logging
 from logging import getLogger, NullHandler
@@ -55,7 +56,12 @@ class EventHandler(EventHandlerBase):
 
         while True:
             # Get next event
-            event = _display.next_event()
+            try:
+                event = _display.next_event()
+            except RuntimeError:
+                print('cont')
+                continue
+
             if isinstance(event, Xlib.protocol.event.KeyPress):
                 # Convert keycode to key name
                 keycode = event.detail
@@ -68,13 +74,18 @@ class EventHandler(EventHandlerBase):
                 else:
                     logger.debug('Unknown key is pressed (keysym: %d}', keysym)
 
-            elif isinstance(event, Xlib.protocol.event.CreateNotify):
-                # Send create event
-                self._out_event_queue.put((EventType.WIN_CREATE, None))
+            elif hasattr(event, 'type'):
+                if event.type == Xlib.X.CreateNotify:
+                    # Deal with only application windows
+                    if get_win_type(event.window) in [WindowType.NORMAL,
+                                                      WindowType.DIALOG]:
+                        # Send create event
+                        self._out_event_queue.put((EventType.WIN_CREATE, None))
 
-            elif isinstance(event, Xlib.protocol.event.DestroyNotify):
-                # Send destroy event
-                self._out_event_queue.put((EventType.WIN_DESTROY, None))
+                elif event.type == Xlib.X.DestroyNotify:
+                    # TODO: Ignore non-application windows
+                    # Send destroy event
+                    self._out_event_queue.put((EventType.WIN_DESTROY, None))
 
             # Release queued events
             _display.allow_events(Xlib.X.AsyncKeyboard, Xlib.X.CurrentTime)

@@ -70,9 +70,6 @@ class Window(WindowBase):
         else:
             style &= ~win32con.WS_CAPTION
         win32gui.SetWindowLong(self._hwnd, win32con.GWL_STYLE, style)
-        win32gui.SetWindowPos(self._hwnd, 0, 0, 0, 0, 0,
-                              win32con.SWP_FRAMECHANGED | win32con.SWP_NOMOVE |
-                              win32con.SWP_NOSIZE | win32con.SWP_NOZORDER)
 
 
 class WindowController(WindowControllerBase):
@@ -97,6 +94,7 @@ class WindowController(WindowControllerBase):
 
     @classmethod
     def get_working_area(cls):
+        # TODO: Consider multi display
         monitors = win32api.EnumDisplayMonitors(None, None)
         for i, monitor in enumerate(monitors):
             (h_mon, _, (_, _, _, _)) = monitor
