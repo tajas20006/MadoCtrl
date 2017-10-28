@@ -65,14 +65,10 @@ class PseudoWorkspace(object):
         self._update_showing_status()  # Update all showing status
 
     def _update_win_showing_status(self, hwnd):
-        flags = win32con.SWP_NOACTIVATE | win32con.SWP_NOMOVE | \
-                win32con.SWP_NOSIZE | win32con.SWP_NOZORDER
         if self._ws_idx == self.get_win_ws(hwnd):
-            win32gui.SetWindowPos(hwnd, 0, 0, 0, 0, 0,
-                                  win32con.SWP_SHOWWINDOW | flags)
+            win32gui.ShowWindow(hwnd, win32con.SW_SHOW)
         else:
-            win32gui.SetWindowPos(hwnd, 0, 0, 0, 0, 0,
-                                  win32con.SWP_HIDEWINDOW | flags)
+            win32gui.ShowWindow(hwnd, win32con.SW_HIDE)
 
     def _update_showing_status(self):
         for hwnd in self._ws_dict.keys():
