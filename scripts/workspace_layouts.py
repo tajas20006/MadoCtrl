@@ -25,6 +25,7 @@ class WorkspaceLayouts(object):
         return self._layout_params[ws_idx]
 
     def change_n_workspaces(self, n):
+        logger.debug('Change the number of workspaces (%d)', n)
         # Allocate for lacking workspaces
         n_lack = n - len(self._layout_params)
         for i in range(n_lack):

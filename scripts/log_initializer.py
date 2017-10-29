@@ -1,18 +1,21 @@
 # -*- coding: utf-8 -*-
 import logging
 
+datefmt = '%Y/%m/%d %H:%M:%S'
 
 # default log format
-default_fmt = logging.Formatter('[%(asctime)s] %(levelname)s '
+default_fmt = logging.Formatter('[%(asctime)s.%(msecs)d] %(levelname)s '
                                 '(%(process)d) %(name)s : %(message)s',
-                                datefmt='%Y/%m/%d %H:%M:%S')
+                                datefmt=datefmt)
 
 # set up handler
 try:
     # Rainbow Logging
     import sys
     from rainbow_logging_handler import RainbowLoggingHandler
-    default_handler = RainbowLoggingHandler(sys.stdout)
+    default_handler = RainbowLoggingHandler(sys.stdout,
+                                            color_msecs=('black', None, True),
+                                            datefmt=datefmt)
 except Exception:
     default_handler = logging.StreamHandler()
 

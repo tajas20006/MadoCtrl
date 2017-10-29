@@ -81,6 +81,7 @@ class KeyEventHandler(object):
         if is_down:
             key_name = interpret_keycode(key_code)
             if key_name is not None:
+                logger.debug('Send KEY_PRESS event (%s)', key_name)
                 self._out_event_queue.put((EventType.KEY_PRESS, key_name))
             else:
                 logger.debug('Unknown key is pressed (keycode: %d)', key_code)
@@ -120,12 +121,13 @@ class WindowEventHandler(object):
 
             # Send create / destroy event
             if event == win32con.EVENT_OBJECT_CREATE:
-                self._out_event_queue.put((EventType.WIN_CREATE, None))
-            elif event == win32con.EVENT_OBJECT_DESTROY:
-                # Wait for closing window
-                while win32gui.IsWindow(hwnd):
-                    time.sleep(0.1)
-                self._out_event_queue.put((EventType.WIN_DESTROY, None))
+                self._out_event_queue.put((EventType.WIN_CREATE, Window(hwnd)))
+                logger.debug('Send WIN_CREATE event')
+
+        # Catch all destroy event because destroyed window's cannot be known
+        if event == win32con.EVENT_OBJECT_DESTROY:
+            logger.debug('Send WIN_DESTROY event')
+            self._out_event_queue.put((EventType.WIN_DESTROY, Window(hwnd)))
 
     def register_hook(self):
         # Wrap and avoid auto-releasing

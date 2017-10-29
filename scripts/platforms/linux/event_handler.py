@@ -71,22 +71,27 @@ class EventHandler(EventHandlerBase):
                 key_name = interpret_keysym(keysym)
                 # Send press event
                 if key_name is not None:
+                    logger.debug('Send KEY_PRESS event (%s)', key_name)
                     self._out_event_queue.put((EventType.KEY_PRESS, key_name))
                 else:
                     logger.debug('Unknown key is pressed (keysym: %d}', keysym)
 
-            elif hasattr(event, 'type'):
+            elif hasattr(event, 'window'):
+                xwin = event.window
                 if event.type == Xlib.X.CreateNotify:
                     # Deal with only application windows
-                    if get_win_type(event.window) in [WindowType.NORMAL,
-                                                      WindowType.DIALOG]:
+                    if get_win_type(xwin) in [WindowType.NORMAL,
+                                              WindowType.DIALOG]:
                         # Send create event
-                        self._out_event_queue.put((EventType.WIN_CREATE, None))
+                        logger.debug('Send WIN_CREATE event')
+                        self._out_event_queue.put((EventType.WIN_CREATE,
+                                                   Window(xwin)))
 
                 elif event.type == Xlib.X.DestroyNotify:
-                    # TODO: Ignore non-application windows
-                    # Send destroy event
-                    self._out_event_queue.put((EventType.WIN_DESTROY, None))
+                    # Send destroy event of all windows
+                    logger.debug('Send WIN_DESTROY event')
+                    self._out_event_queue.put((EventType.WIN_DESTROY,
+                                               Window(xwin)))
 
             # Release queued events
             _display.allow_events(Xlib.X.AsyncKeyboard, Xlib.X.CurrentTime)

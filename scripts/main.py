@@ -27,32 +27,38 @@ class MadoCtrl(object):
         self._event_queue = queue.Queue()
         self._event_handler = EventHandler(self._event_queue, modif)
 
-        n_ws = WinController.get_n_workspace()
-
         # Window stack for static order
+        n_ws = WinController.get_n_workspace()
         wins = WinController.get_window_list()
         self._win_stack = WindowStack(n_ws, wins)
 
-        # Layout
+        # Layout for each workspace
         self._layouts = WorkspaceLayouts(n_ws, layouts)
 
     def start(self):
         # Event loop
         while True:
             event_type, event_data = self._event_queue.get()
-            if event_type in [EventType.WIN_CREATE, EventType.WIN_DESTROY]:
-                # A window is changed
+            logger.debug('Get new event (%d, %s)', event_type, str(event_data))
+            if event_type == EventType.WIN_CREATE:
+                # A window is created
                 ws_idx = WinController.get_curr_workspace()
-                self.arrange(ws_idx)
+                self._win_stack.update_new_window(event_data, ws_idx)
+                self.arrange()
+            elif event_type == EventType.WIN_DESTROY:
+                # A window is destroyed
+                self._win_stack.update_old_window(event_data)
+                self.arrange()
             elif event_type == EventType.KEY_PRESS:
                 # A key is pressed
                 self.deal_key_event(event_data)
 
-    def arrange(self, ws_idx):
-        # Update window stack
-        wins_all = WinController.get_window_list()
-        self._win_stack.update(wins_all)
+    def arrange(self):
+#         # Update window stack
+#         wins_all = WinController.get_window_list()
+#         self._win_stack.update(wins_all)
         # Arrange windows
+        ws_idx = WinController.get_curr_workspace()
         wins = self._win_stack.get_wins(ws_idx)
         area = WinController.get_working_area()
         self._layouts.arrange(ws_idx, wins, area)
@@ -62,12 +68,20 @@ class MadoCtrl(object):
         self._layouts.change_n_workspaces(n)
         WinController.set_n_workspace(n)
 
+    def change_workspace(self, step):
+        ws_idx = WinController.get_curr_workspace()
+        n_ws = WinController.get_n_workspace()
+        WinController.set_curr_workspace((ws_idx + step) % n_ws)
+
+    def change_focus(self, step):
+        ws_idx = WinController.get_curr_workspace()
+        focused_win = WinController.get_focused_window()
+        self._win_stack.change_focus(ws_idx, focused_win, step)
+
     def deal_key_event(self, key):
         # TODO: Make configurable
         if key == 'a':
-            # Arrange
-            ws_idx = WinController.get_curr_workspace()
-            self.arrange(ws_idx)
+            self.arrange()
 
         elif key == SpecialKeyNames.SPACE:
             # Change layout mode
@@ -75,24 +89,16 @@ class MadoCtrl(object):
             self._layouts.next_layout(ws_idx)
 
         elif key == 'j':
-            ws_idx = WinController.get_curr_workspace()
-            focused_win = WinController.get_focused_window()
-            self._win_stack.change_focus(ws_idx, focused_win, 1)
+            self.change_focus(1)
 
         elif key == 'k':
-            ws_idx = WinController.get_curr_workspace()
-            focused_win = WinController.get_focused_window()
-            self._win_stack.change_focus(ws_idx, focused_win, -1)
+            self.change_focus(-1)
 
         elif key == 'l':
-            ws_idx = WinController.get_curr_workspace()
-            n_ws = WinController.get_n_workspace()
-            WinController.set_curr_workspace((ws_idx + 1) % n_ws)
+            self.change_workspace(1)
 
         elif key == 'h':
-            ws_idx = WinController.get_curr_workspace()
-            n_ws = WinController.get_n_workspace()
-            WinController.set_curr_workspace((ws_idx - 1) % n_ws)
+            self.change_workspace(-1)
 
 #         elif key == '9':
 #
@@ -102,7 +108,7 @@ class MadoCtrl(object):
             # Toggle ignoring mode of dialogs
             ws_idx = WinController.get_curr_workspace()
             self._layouts.toggle_dialog_arrange(ws_idx)
-            self.arrange(ws_idx)
+            self.arrange()
 
         else:
             # Change workspace with number key
