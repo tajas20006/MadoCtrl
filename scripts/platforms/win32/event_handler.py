@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 
-import threading
 import atexit
+import threading
+import time
 
 import ctypes
 import ctypes.wintypes
@@ -121,6 +122,9 @@ class WindowEventHandler(object):
             if event == win32con.EVENT_OBJECT_CREATE:
                 self._out_event_queue.put((EventType.WIN_CREATE, None))
             elif event == win32con.EVENT_OBJECT_DESTROY:
+                # Wait for closing window
+                while win32gui.IsWindow(hwnd):
+                    time.sleep(0.1)
                 self._out_event_queue.put((EventType.WIN_DESTROY, None))
 
     def register_hook(self):

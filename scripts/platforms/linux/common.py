@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+import Xlib.threaded  # make thread safe
 from ewmh import EWMH
 from Xlib import Xatom
 from Xlib.error import BadWindow

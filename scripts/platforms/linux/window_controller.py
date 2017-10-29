@@ -2,6 +2,7 @@
 
 # TODO: Replace ewmh with xlib
 
+import Xlib.threaded  # make thread safe
 from Xlib import Xatom, X
 
 from ...constants import WindowType
@@ -29,6 +30,9 @@ class Window(WindowBase):
     def __init__(self, xwin):
         self._xwin = xwin  # Xlib.display.Window
 
+    def __eq__(self, other):
+        return self._xwin == other._xwin
+
     def get_name(self):
         return _ewmh.getWmName(self._xwin).decode('utf-8')
 
@@ -40,6 +44,8 @@ class Window(WindowBase):
         _flush()
 
     def set_geom(self, x, y, w, h):
+        _ewmh.setWmState(self._xwin, 0, "_NET_WM_STATE_MAXIMIZED_VERT")
+        _ewmh.setWmState(self._xwin, 0, "_NET_WM_STATE_MAXIMIZED_HORZ")
         _ewmh.setMoveResizeWindow(self._xwin, 0, x, y, w, h)
         _flush()
 

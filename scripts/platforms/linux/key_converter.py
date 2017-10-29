@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+import Xlib.threaded  # make thread safe
 from Xlib import XK
 
 from ...constants import SpecialKeyNames

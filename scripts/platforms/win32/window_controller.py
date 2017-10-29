@@ -27,6 +27,9 @@ class Window(WindowBase):
     def __init__(self, hwnd):
         self._hwnd = hwnd
 
+    def __eq__(self, other):
+        return self._hwnd == other._hwnd
+
     def get_name(self):
         return win32gui.GetWindowText(self._hwnd)
 

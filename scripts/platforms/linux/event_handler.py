@@ -2,6 +2,7 @@
 
 import threading
 
+import Xlib.threaded  # make thread safe
 import Xlib
 from Xlib import Xatom, X, XK
 
@@ -58,8 +59,8 @@ class EventHandler(EventHandlerBase):
             # Get next event
             try:
                 event = _display.next_event()
-            except RuntimeError:
-                print('cont')
+            except RuntimeError as e:
+                logger.error(e)
                 continue
 
             if isinstance(event, Xlib.protocol.event.KeyPress):

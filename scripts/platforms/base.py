@@ -84,7 +84,12 @@ class WindowControllerBase(metaclass=ABCMeta):
 
 
 class EventHandlerBase(metaclass=ABCMeta):
-    '''Event handler for each platform'''
+    '''Event handler for each platform
+        When a key is pressed with `modif_key`, `(EventType.KEY_PRESS)` will
+        be sent via `event_queue`.
+        When a window is created / destroyed, `(EventType.WIN_CREATE, None)` /
+        `(EventType.WIN_DESTROY, None)` will be sent.
+    '''
 
     @abstractmethod
     def __init__(self, event_queue, modif_key):
